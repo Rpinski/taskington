@@ -1,29 +1,22 @@
 using System;
 using System.Linq;
-using Taskington.Base.Events;
 using Taskington.Base.Plans;
-using Taskington.Base.Service;
 
 namespace Taskington.Gui.ViewModels
 {
-    class ModelEventDispatcher : IAutoInitializable
+    class ModelEventDispatcher
     {
-        private readonly IApplicationEvents events;
         private readonly MainWindowViewModel mainWindowViewModel;
 
-        public ModelEventDispatcher(IApplicationEvents events, MainWindowViewModel mainWindowViewModel)
+        public ModelEventDispatcher(MainWindowViewModel mainWindowViewModel)
         {
-            this.events = events;
             this.mainWindowViewModel = mainWindowViewModel;
-        }
 
-        public void Initialize()
-        {
-            events.PlanCanExecuteUpdated += (o, e) => UpdateViewModel(e.Plan, m => m.CanExecute = e.CanExecute);
-            events.PlanHasErrorsUpdated += (o, e) => UpdateViewModel(e.Plan, m => m.HasErrors = e.HasErrors);
-            events.PlanIsRunningUpdated += (o, e) => UpdateViewModel(e.Plan, m => m.IsRunning = e.IsRunning);
-            events.PlanProgressUpdated += (o, e) => UpdateViewModel(e.Plan, m => m.Progress = e.Progress);
-            events.PlanStatusTextUpdated += (o, e) => UpdateViewModel(e.Plan, m => m.StatusText = e.StatusText);
+            PlanEvents.PlanCanExecuteUpdated.Subscribe((plan, canExecute) => UpdateViewModel(plan, m => m.CanExecute = canExecute));
+            PlanEvents.PlanHasErrorsUpdated.Subscribe((plan, hasErrors, validationText) => UpdateViewModel(plan, m => m.HasErrors = hasErrors));
+            PlanEvents.PlanIsRunningUpdated.Subscribe((plan, isRunning) => UpdateViewModel(plan, m => m.IsRunning = isRunning));
+            PlanEvents.PlanProgressUpdated.Subscribe((plan, progress) => UpdateViewModel(plan, m => m.Progress = progress));
+            PlanEvents.PlanStatusTextUpdated.Subscribe((plan, statusText) => UpdateViewModel(plan, m => m.StatusText = statusText));
         }
 
         private void UpdateViewModel(Plan plan, Action<PlanViewModel> updater)
