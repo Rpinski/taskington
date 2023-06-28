@@ -53,6 +53,14 @@ internal class MacOsSystemOperations
     internal static Placeholders LoadMacOsSystemPlaceholders()
     {
         var placeholders = new Placeholders();
+
+        var removableDrives = DriveInfo.GetDrives()
+            .Where(drive => drive.IsReady && drive.DriveType == DriveType.Removable);
+        foreach (var drive in removableDrives)
+        {
+            placeholders[$"drive:{drive.VolumeLabel}"] = drive.RootDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar);
+        }
+
         placeholders["AppDataRoaming"] = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
         return placeholders;
