@@ -54,9 +54,12 @@ internal class MacOsSystemOperations
     {
         var placeholders = new Placeholders();
 
-        var removableDrives = DriveInfo.GetDrives()
-            .Where(drive => drive.IsReady && drive.DriveType == DriveType.Removable);
-        foreach (var drive in removableDrives)
+        var drives = DriveInfo.GetDrives()
+            .Where(drive =>
+                drive.IsReady &&
+                drive.DriveType is not DriveType.NoRootDirectory and not DriveType.CDRom &&
+                drive.RootDirectory.Name != "/");
+        foreach (var drive in drives)
         {
             placeholders[$"drive:{drive.VolumeLabel}"] = drive.RootDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar);
         }
